@@ -6,8 +6,10 @@ from bs4 import BeautifulSoup
 from re import findall
 from re import compile as regex
 from datetime import datetime
-import matplotlib.pyplot as plt
+from time import gmtime, strftime
 import matplotlib as mat
+import matplotlib.pyplot as plot
+import matplotlib.pylab as lab
 import numpy as np
 import pickle
 
@@ -67,27 +69,31 @@ def yield_dates(domains):
         except:
             bug('X',newline=False)
     dates.sort()
-    return dates
+    return dates, domains
 
-def yield_plot(dates):
+def yield_plot(dates, domains):
     "Accepts dates and yields a scatterplot."
     bug(dates)
     places = range(len(dates))
     bug(places)
     dates = mat.dates.date2num(dates)
     colours = np.linspace(0.1,0.9,num=len(dates))
-    plt.gca().xaxis.set_major_formatter(mat.dates.DateFormatter('%Y'))
-    plt.scatter(dates, places, c=colours, marker='o', s=200, alpha=.5)
-    plt.show()
+    plot.gca().xaxis.set_major_formatter(mat.dates.DateFormatter('%Y'))
+    plot.scatter(dates, places, c=colours, marker='o', s=200, alpha=.5)
+    # plot.show()
+    stamp = strftime("%Y-%m-%d_%H:%M:%S", gmtime())
+    lab.savefig('plot'+stamp+'.png')
+    lab.savefig('plot'+stamp+'.svg')
+    lab.savefig('plot'+stamp+'.pdf')
+    return plot, dates, domains
 
-def yield_pickle(domains,dates,plot):
-    pickle.dump(domains,open('domains.p','wb'))
+def yield_pickle(plot,dates,domains):
+    pickle.dump(domains,open('domains.pic','wb'))
     pickle.dump(dates,open('dates.pic','wb'))
-    pickle.dump(plot,open('plot.pic','wb'))
+    print('New files: domains.pic, dates.pic, plot...{png,svg,pdf}')
 
-#yield_pickle(*yield_plot(*yield_dates(*yield_domains(urls))))
+yield_pickle(*yield_plot(*yield_dates(yield_domains(urls))))
 
-yield_plot(yield_dates(yield_domains(urls)))
 
 
 
