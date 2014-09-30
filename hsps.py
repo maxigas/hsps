@@ -96,7 +96,7 @@ def hsps_plot(dates, domains):
     ydata = range(len(xdata))
     colours = np.linspace(0.1,0.9,num=len(xdata))
     plot.gca().xaxis.set_major_formatter(mat.dates.DateFormatter('%Y'))
-    plot.scatter(xdata, ydata, c=colours, marker='*', s=500, alpha=.8)
+    plot.scatter(xdata, ydata, c=colours, marker='o', s=500, alpha=.8)
     stamp = strftime("%Y-%m-%d_%H:%M:%S", gmtime())
     for extension in ('png','svg','pdf'):
         lab.savefig('plot'+stamp+'.'+extension)
@@ -140,13 +140,12 @@ def parse_hacklab_domains(filename="hacklab.domains"):
 parse_hacklab_domains2 = lambda x: [ domain.strip() for domain in list(open(x,'r')) ]
 
 # Production:
-# hsps_pickle(*hsps_plot(*hsps_dates(hsps_domains(urls))))
+hsps_pickle(*hsps_plot(*hsps_dates(hsps_domains(urls))))
+hsps_plots(*hsps_unpickle(), dates2=parse_hacklab_dates(), domains2=parse_hacklab_domains())
 
 # Development:
 # hsps_plot(*hsps_unpickle())
-
-# Test:
-#print(parse_hacklab_dates(), parse_hacklab_domains())
-#hsps_plots(parse_hacklab_dates(), parse_hacklab_domains())
-#hsps_plots(*hsps_unpickle(), dates2=parse_hacklab_dates(), domains2=parse_hacklab_domains())
-hsps_plot(parse_hacklab_dates(), parse_hacklab_domains())
+# print(parse_hacklab_dates(), parse_hacklab_domains())
+# hsps_plots(parse_hacklab_dates(), parse_hacklab_domains())
+# hsps_plots(*hsps_unpickle(), dates2=parse_hacklab_dates(), domains2=parse_hacklab_domains())
+# hsps_plot(parse_hacklab_dates(), parse_hacklab_domains())
