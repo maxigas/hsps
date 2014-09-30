@@ -12,7 +12,7 @@ import matplotlib.pylab as lab
 import numpy as np
 import pickle
 
-debug = True
+debug = False
 
 # Sample data:
 #urls = ('http://hackerspaces.org/w/index.php?title=Special:Ask&offset=100&limit=20&q=%5B%5BCategory%3AHackerspace%5D%5D&p=format%3Dbroadtable%2Fmainlabel%3DHackerspace&po=%3F%3DHackerspace%23%0A%3FCountry%0A%3FState%0A%3FCity%0A%3FWebsite%0A%3FDate+of+founding%0A%3FHackerspace+status%0A&sort=Country')
@@ -140,7 +140,7 @@ def parse_hacklab_domains(filename="hacklab.domains"):
 parse_hacklab_domains2 = lambda x: [ domain.strip() for domain in list(open(x,'r')) ]
 
 # Production:
-hsps_pickle(*hsps_plot(*hsps_dates(hsps_domains(urls))))
+#hsps_pickle(*hsps_plot(*hsps_dates(hsps_domains(urls))))
 hsps_plots(*hsps_unpickle(), dates2=parse_hacklab_dates(), domains2=parse_hacklab_domains())
 
 # Development:
