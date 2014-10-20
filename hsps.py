@@ -13,6 +13,7 @@ import numpy as np
 import pickle
 
 debug = False
+figsdpi = 600
 
 # Sample data:
 #urls = ('http://hackerspaces.org/w/index.php?title=Special:Ask&offset=100&limit=20&q=%5B%5BCategory%3AHackerspace%5D%5D&p=format%3Dbroadtable%2Fmainlabel%3DHackerspace&po=%3F%3DHackerspace%23%0A%3FCountry%0A%3FState%0A%3FCity%0A%3FWebsite%0A%3FDate+of+founding%0A%3FHackerspace+status%0A&sort=Country')
@@ -85,26 +86,30 @@ def domain_to_date(domain):
     sleep(1)
     return date
 
-def hsps_plot(dates, domains):
-    "Accepts dates and domains, returns a scatterplot."
+def hsps_plot(dates, domains, filename='plot', style='o'):
+    "Accept dates and domains, return a scatterplot."
     bug('Dates are' + str(dates))
     bug('Domains are' + str(domains))
     # Cleaning data
     dates = list(filter(None, dates))
+    dates = filter_hackerspaces_dates(dates)
     bug('New dates are' + str(dates))
     xdata = mat.dates.date2num(dates)
     ydata = range(len(xdata))
     colours = np.linspace(0.1,0.9,num=len(xdata))
     plot.gca().xaxis.set_major_formatter(mat.dates.DateFormatter('%Y'))
-    plot.scatter(xdata, ydata, c=colours, marker='o', s=500, alpha=.8)
+    plot.scatter(xdata, ydata, c=colours, marker=style, s=500, alpha=.8)
     stamp = strftime("%Y-%m-%d_%H:%M:%S", gmtime())
     for extension in ('png','svg','pdf'):
-        lab.savefig('plot'+stamp+'.'+extension)
-        lab.savefig('plot'+'.'+extension)
+        lab.savefig(filename+stamp+'.'+extension, dpi=figsdpi)
+        lab.savefig(filename+'.'+extension, dpi=figsdpi)
     return (dates, domains)
 
-def hsps_plots(dates, domains, dates2, domains2):
-    "Accepts two bunch of dates and domains, returns a scatterplot."
+def hsps_plots(dates, domains, dates2, domains2, filename='plot'):
+    "Accept two lists of dates and domains, return a scatterplot."
+    # Cleaning data
+    dates = list(filter(None, dates))
+    dates = filter_hackerspaces_dates(dates)
     xdata  = mat.dates.date2num(dates)
     xdata2 = mat.dates.date2num(dates2)
     ydata,ydata2 = range(len(xdata)), range(len(xdata2))
@@ -114,8 +119,8 @@ def hsps_plots(dates, domains, dates2, domains2):
     plot.scatter(xdata2, ydata2, c=colours2, marker='*', s=400, alpha=0.75)
     stamp = strftime("%Y-%m-%d_%H:%M:%S", gmtime())
     for extension in ('png','svg','pdf'):
-        lab.savefig('plot'+stamp+'.'+extension)
-        lab.savefig('plot'+'.'+extension)
+        lab.savefig(filename+stamp+'.'+extension, dpi=600)
+        lab.savefig(filename+'.'+extension, dpi=600)
     return (dates, domains)
 
 def hsps_pickle(dates,domains):
@@ -126,26 +131,43 @@ def hsps_pickle(dates,domains):
 def hsps_unpickle():
     return (pickle.load(open('dates.pic','rb')), pickle.load(open('domains.pic','rb')))
 
-def parse_hacklab_dates(filename="hacklab.dates"):
+def parse_hacklab_dates(filename='hacklab.dates'):
     "Accepts a file name and returns list of date objects"
     dates = [ datetime.strptime(date, "%m/%d/%y\n") for date in list(open(filename,'r')) ]
     dates.sort()
     return dates
 
-def parse_hacklab_domains(filename="hacklab.domains"):
-    "Accept file name and returns list of date objects"
-    return [ domain.strip() for domain in list(open(filename,'r')) ]
+parse_hacklab_domains = lambda x: [ domain.strip() for domain in list(open(x,'r')) ]
 
-# We could write this maybe with lambda:
-parse_hacklab_domains2 = lambda x: [ domain.strip() for domain in list(open(x,'r')) ]
+def filter_hackerspaces_dates(dates):
+    "Accepts a list of dates and returns the ones before now."
+    olddates = dates
+    newdates = []
+    now = datetime.now()
+    cap = datetime(2013,12,12)
+    for date in olddates:
+        if date < cap:
+            newdates.append(date)
+            bug('.', newline=False)
+        else:
+            bug('x', newline=False)
+    newdates.sort()
+    return newdates
 
-# Production:
+# --- Production:
 #hsps_pickle(*hsps_plot(*hsps_dates(hsps_domains(urls))))
-hsps_plots(*hsps_unpickle(), dates2=parse_hacklab_dates(), domains2=parse_hacklab_domains())
 
-# Development:
+# --- Use pickled results:
+# 1. Create hacklabs plot:
+# hsps_plot(parse_hacklab_dates(), parse_hacklab_domains('hacklab.domains'), style='*', filename='hacklabs')
+# 2. Create hackerspaces plot:
+# hsps_plot(*hsps_unpickle(), style='o', filename='hackerspaces')
+# 3. Create combined plot:
+hsps_plots(*hsps_unpickle(), dates2=parse_hacklab_dates(), domains2=parse_hacklab_domains('hacklab.domains'), filename='hacklabs-vs-hackerspaces')
+
+# --- Development:
 # hsps_plot(*hsps_unpickle())
 # print(parse_hacklab_dates(), parse_hacklab_domains())
 # hsps_plots(parse_hacklab_dates(), parse_hacklab_domains())
 # hsps_plots(*hsps_unpickle(), dates2=parse_hacklab_dates(), domains2=parse_hacklab_domains())
-# hsps_plot(parse_hacklab_dates(), parse_hacklab_domains())
+
